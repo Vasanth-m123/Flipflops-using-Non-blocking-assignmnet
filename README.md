@@ -28,96 +28,188 @@ Non Blocking assignments execute sequentially in the given order, which makes it
 
 ### SR Flip-Flop (Non Blocking)
 ```verilog
-module sr_ff (
-    input wire S, R, clk,
-    output reg Q
-);
-    always @(posedge clk) begin
-
-
-
+module srff_nbk(clk,S,R,Q);
+    input clk,S,R;
+    output reg Q;
+    
+    always @(posedge clk) 
+        begin
+            case ({S,R})
+                2'b00: Q <= Q;      
+                2'b01: Q <= 0;      
+                2'b10: Q <= 1;      
+                2'b11: Q <= 1'bx;   
+                default: Q <= Q;
+            endcase
+        end
 endmodule
 ```
 ### SR Flip-Flop Test bench 
 ```verilog
-
-
-
+module srff_nbk_tb;
+  reg clk, S, R;
+  wire Q;
+  srff_nbk dut(.clk(clk),.S(S),.R(R),.Q(Q));
+  initial begin
+   clk = 0;
+  forever #10 clk = ~clk; 
+  end
+  initial begin
+    S = 0; R = 0;
+    #100 S = 1; R = 0;   
+    #100 S = 0; R = 0;   
+    #100 S = 0; R = 1;   
+    #100 S = 1; R = 1;  
+    #100 S = 0; R = 0;
+ end
+endmodule
 ```
 #### SIMULATION OUTPUT
 
-------- paste the output here -------
----
+<img width="1906" height="1079" alt="Screenshot 2025-10-03 102911" src="https://github.com/user-attachments/assets/c2d4b046-8aee-4cb9-a918-e37d856badfe" />
+
 
 ### JK Flip-Flop (Non Blocking)
 ```verilog
-module jk_ff (
-    input wire J, K, clk,
-    output reg Q
-);
-    always @(posedge clk) begin
-
-
-
+module jkff_nbk(clk,rst,J,K,Q);
+    input clk,rst,J,K;
+    output reg Q;
+    always@(posedge clk)
+      begin
+        case({J,K})
+            2'b00 : Q <= Q;
+            2'b01 : Q <= 0;
+            2'b10 : Q <= 1;
+            2'b11 : Q <= ~Q;
+            default : Q <= Q;
+         endcase
+     end
 endmodule
 ```
 ### JK Flip-Flop Test bench 
 ```verilog
-
-
-
+module jkff_nbk_tb;
+    reg clk_t,rst_t,J_t,K_t;
+    wire Q_t;
+    
+    jkff_nbk dut(.clk(clk_t),.rst(rst_t),.J(J_t),.K(K_t),.Q(Q_t));
+    
+    initial
+      begin
+        clk_t = 1'b0;
+        rst_t = 1'b1;
+      #20
+        rst_t = 1'b0;
+        J_t = 1'b0;
+        K_t = 1'b0;
+      #20
+        J_t = 1'b0;
+        K_t = 1'b1;
+      #20
+        J_t = 1'b1;
+        K_t = 1'b0;
+      #20
+        J_t = 1'b1;
+        K_t = 1'b1;
+     end
+     
+     always 
+        #10 clk_t = ~clk_t;  
+endmodule
 ```
 #### SIMULATION OUTPUT
 
-------- paste the output here -------
----
+<img width="1919" height="1079" alt="Screenshot 2025-10-03 103425" src="https://github.com/user-attachments/assets/44b5e7ca-c552-4f4c-9046-1e0d025c08d5" />
+
 ### D Flip-Flop (Non Blocking)
 ```verilog
-module d_ff (
-    input wire d,clk,
-    output reg Q
-);
-    always @(posedge clk) begin
-
-
-
+module d_ff_nbk(clk,rst,d,dout);
+    input clk,rst,d;
+    output reg dout;
+    always@ (posedge clk)
+    begin
+        if(rst)
+            dout <= 1'b0;
+        else
+            dout <= d;
+     end
 endmodule
+
 ```
 ### D Flip-Flop Test bench 
 ```verilog
-
-
-
+module d_ff_nbk_tb;
+    reg clk_t,rst_t,d_t;
+    wire dout_t;
+    
+    d_ff_nbk dut(.clk(clk_t),.rst(rst_t),.d(d_t),.dout(dout_t));
+    
+    initial
+      begin
+        clk_t = 1'b0;
+        rst_t = 1'b1;
+     #20
+        rst_t = 1'b0;
+        d_t   = 1'b0;
+     #20
+        d_t = 1'b1;
+     end
+     
+     always 
+        #10 clk_t = ~clk_t;
+endmodule
 ```
 
 #### SIMULATION OUTPUT
 
-------- paste the output here -------
----
+<img width="1919" height="1079" alt="Screenshot 2025-10-03 103758" src="https://github.com/user-attachments/assets/bf30b409-99a3-4980-9537-abb077ee874c" />
+
 ### T Flip-Flop (Non Blocking)
 ```verilog
-module d_ff (
-    input wire d,clk,
-    output reg Q
-);
-    always @(posedge clk) begin
-
-
-
+module tff_nbk(clk,rst,T,Tout);
+    input clk,rst,T;
+    output reg Tout;
+    
+    always@(posedge clk) 
+      begin
+         if(rst)
+            Tout <= 1'b0;
+         else if(T)
+            Tout <= ~Tout;
+         else
+            Tout <= Tout;
+   end
 endmodule
+
 ```
 ### T Flip-Flop Test bench 
 ```verilog
-
-
-
+module tff_nbk_tb;
+    reg clk_t,rst_t,T_t;
+    wire Tout_t;
+    
+    tff_nbk dut(.clk(clk_t),.rst(rst_t),.T(T_t),.Tout(Tout_t));
+    
+    initial
+     begin
+        clk_t = 1'b0;
+        rst_t = 1'b1;
+     #20
+        rst_t = 1'b0;
+        T_t = 1'b0;
+     #20
+        T_t = 1'b1;
+     end
+     
+     always 
+        #10 clk_t = ~clk_t;
+endmodule
 ```
 
 #### SIMULATION OUTPUT
 
-------- paste the output here -------
+<img width="1919" height="1079" alt="Screenshot 2025-10-03 104107" src="https://github.com/user-attachments/assets/c12d301c-e3c3-4290-b582-52eff07576ce" />
 
----
 
 ### RESULT
 
